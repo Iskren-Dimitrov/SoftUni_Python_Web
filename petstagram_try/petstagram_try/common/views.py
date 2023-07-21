@@ -11,8 +11,6 @@ def index(request):
     all_photos = Photo.objects.all()
     comment_form = CommentForm()
     search_form = SearchForm()
-    user = request.user
-    all_liked_photos_by_request_user = [like.to_photo_id for like in user.like_set.all()]
 
     if request.method == 'POST':
         search_form = SearchForm(request.POST)
@@ -20,11 +18,14 @@ def index(request):
         if search_form.is_valid():
             all_photos = all_photos.filter(tagged_pets__name__icontains=search_form.cleaned_data['pet_name'])
 
+    for photo in all_photos:
+        photo.liked_by_user = photo.like_set.filter(user=request.user).exists()
+
     context = {
         'all_photos': all_photos,
         'comment_form': comment_form,
         'search_form': search_form,
-        'all_liked_photos_by_request_user': all_liked_photos_by_request_user,
+
     }
     return render(request, template_name='common/home-page.html', context=context)
 

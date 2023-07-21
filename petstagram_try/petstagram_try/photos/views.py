@@ -1,24 +1,43 @@
+from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect
-
+from django.urls import reverse
+from django.views import generic as views
 from petstagram_try.common.forms import CommentForm
 from petstagram_try.photos.forms import PhotoCreateForm, PhotoEditForm
 from petstagram_try.photos.models import Photo
 
 
-def add_photo(request):
-    form = PhotoCreateForm(request.POST or None, request.FILES or None)
-    if form.is_valid():
-        photo = form.save(commit=False)
-        photo.user = request.user
-        photo.save()
-        form.save_m2m()
-        return redirect('index')
+class PhotoAddView(views.CreateView):
+    template_name = 'photos/photo-add-page.html'
+    form_class = PhotoCreateForm
 
-    context = {
-        'form': form
-    }
+    def get_success_url(self):
+        return reverse('details-photo', kwargs={
+            'pk': self.object.pk
+        })
 
-    return render(request, template_name='photos/photo-add-page.html', context=context)
+    def form_valid(self, form):
+        self.object = form.save(commit=False)
+        self.object.user = self.request.user
+        self.object.save()
+        return super().form_valid(form)
+
+
+# @login_required
+# def add_photo(request):
+#     form = PhotoCreateForm(request.POST or None, request.FILES or None)
+#     if form.is_valid():
+#         photo = form.save(commit=False)
+#         photo.user = request.user
+#         photo.save()
+#         form.save_m2m()
+#         return redirect('index')
+#
+#     context = {
+#         'form': form
+#     }
+#
+#     return render(request, template_name='photos/photo-add-page.html', context=context)
 
 
 def details_photo(request, pk):
@@ -61,4 +80,3 @@ def delete_photo(request, pk):
     photo = Photo.objects.get(pk=pk)
     photo.delete()
     return redirect('index')
-

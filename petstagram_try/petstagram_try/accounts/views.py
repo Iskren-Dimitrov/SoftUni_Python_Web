@@ -34,20 +34,23 @@ class UserLogoutView(auth_views.LogoutView):
 class UserDetailsView(views.DetailView):
     model = PetstagramUser
     template_name = 'accounts/profile-details-page.html'
+    profile_image = static('images/person.png')
+
+    def get_profile_image(self):
+        if self.object.profile_picture is not None:
+            return self.object.profile_picture
+        return self.profile_image
 
     def get_context_data(self, **kwargs):
-        profile_image = static('images/person.png')
-
-        if self.object.profile_picture is not None:
-            profile_image = self.object.profile_picture
-
         context = super().get_context_data(**kwargs)
+
+        context['profile_image'] = self.get_profile_image()
+        context['pets'] = self.request.user.pet_set.all()
 
         total_likes_count = sum(p.like_set.count() for p in self.object.photo_set.all())
 
         context.update({
-            'total_likes_count': total_likes_count,
-            'profile_image': profile_image,
+            'total_likes_count': total_likes_count
         })
 
         return context
