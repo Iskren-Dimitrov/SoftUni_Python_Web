@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+{% block content %}
+    <!-- Start Login Section-->
+    <div class="login-register-div">
+        <div class="login-register-box">
+            <h1>Petstagram</h1>
+
+            <!-- Start Login Form-->
+            <form action="{% url 'login' %}" method="post">
+                {% csrf_token %}
+                {{ form.username }}
+                {{ form.password }}
+                <!-- Login Button-->
+                <input type="hidden" value="{{ next_page }}" name='next'>
+                <button type="submit">Log in</button>
+            </form>
+            <!-- End Login Form -->
+
+        </div>
+        <div class="second-option">
+
+            <!-- Link to Register Page-->
+            <p>Don't have account? <a href="{% url 'register' %}">Register</a></p>
+        </div>
+    </div>
+    <!-- End Login Section-->
+
+{% endblock %}
