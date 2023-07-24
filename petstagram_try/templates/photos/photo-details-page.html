@@ -25,11 +25,15 @@
                         <h3>
 
                             <!-- Link to User Profile Details Page -->
-                            <a href="#">
+                            <a href="">
+                                {% if user.first_name and user.last_name %}
                                 <!-- IF user has first name and last name -->
-                                Diyan Kalaydzhiev
+                                {{ user.get_user_name }}
                                 <!-- else -->
+                                {% else %}
+                                {{ user.username }}
                                 <!-- show user username -->
+                                {% endif %}
                             </a>
                             <br>
 
@@ -166,7 +170,7 @@
                     <p class="pet-details">{{ photo.description }}</p>
 
                     <!-- Date of Publication or edit of the Photo -->
-                    <h5 class="postTime">{{ photo.date_time_of_publication  }}</h5>
+                    <h5 class="postTime">{{ photo.date_time_of_publication }}</h5>
 
                     <!-- Start Comments Section -->
                     {% for comment in photo.comment_set.all %}
@@ -183,11 +187,30 @@
                                             </div>
                                         </div>
                                         <p>
+
+                                <!-- IF user has first name and last name -->
+
+                                <!-- else -->
+
+
+                                <!-- show user username -->
+
+
+
+
+
+
                                             <!-- Link to User Profile Details Page-->
                                             <!-- User First and/or Last Name or username-->
-                                            <a href="">Steven Ivanov</a>
+
+                                            {% if user.first_name and user.last_name %}
+                                            <a href="">{{ user.get_user_name }}</a>
+                                                {% else %}
+                                                {{ user.username }}
                                             <!-- User Comment -->
+                                                 {% endif %}
                                             {{ comment.text }}
+
                                         </p>
                                     </div>
                                     <span>{{ comment.date_time_of_publication }}</span>

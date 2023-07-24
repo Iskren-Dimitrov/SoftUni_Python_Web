@@ -1,3 +1,4 @@
+from django.http import HttpResponse
 from django.shortcuts import render
 from django.templatetags.static import static
 from django.urls import reverse_lazy
@@ -5,14 +6,16 @@ from django.views import generic as views
 
 from petstagram_try.accounts.forms import PetstagramUserCreateForm, LoginForm, PetstagramUserEditForm
 from petstagram_try.accounts.models import PetstagramUser
-from django.contrib.auth import views as auth_views, login
+from django.contrib.auth import views as auth_views, login, get_user_model
+
+UserModel = get_user_model()
 
 
 class UserRegisterView(views.CreateView):
     model = PetstagramUser
     form_class = PetstagramUserCreateForm
     template_name = 'accounts/register-page.html'
-    success_url = reverse_lazy('login')
+    success_url = reverse_lazy('index')
 
     def form_valid(self, form):
         result = super().form_valid(form)
@@ -62,8 +65,10 @@ class UserEditView(views.UpdateView):
     template_name = 'accounts/profile-edit-page.html'
 
     def get_success_url(self):
-        return reverse_lazy('profile_details', kwargs={'pk': self.object.pk})
+        return reverse_lazy('profile-details', kwargs={'pk': self.object.pk})
 
 
-def delete_profile(request, pk):
-    return render(request, template_name='accounts/profile-delete-page.html')
+class UserDeleteView(views.DeleteView):
+    template_name = 'accounts/profile-delete-page.html'
+    model = UserModel
+    success_url = reverse_lazy('index')

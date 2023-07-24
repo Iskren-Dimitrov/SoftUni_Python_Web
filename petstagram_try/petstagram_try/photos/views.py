@@ -1,4 +1,5 @@
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.shortcuts import render, redirect
 from django.urls import reverse
 from django.views import generic as views
@@ -7,7 +8,7 @@ from petstagram_try.photos.forms import PhotoCreateForm, PhotoEditForm
 from petstagram_try.photos.models import Photo
 
 
-class PhotoAddView(views.CreateView):
+class PhotoAddView(LoginRequiredMixin, views.CreateView):
     template_name = 'photos/photo-add-page.html'
     form_class = PhotoCreateForm
 
@@ -40,24 +41,41 @@ class PhotoAddView(views.CreateView):
 #     return render(request, template_name='photos/photo-add-page.html', context=context)
 
 
+# def details_photo(request, pk):
+#     photo = Photo.objects.get(pk=pk)
+#     likes = photo.like_set.all()
+#     comments = photo.comment_set.all()
+#     comment_form = CommentForm()
+#     photo_is_liked_by_user = likes.filter(user=request.user)
+#
+#     context = {
+#         'photo': photo,
+#         'likes': likes,
+#         'comment_form': comment_form,
+#         'comments': comments,
+#         'photo_is_liked_by_user': photo_is_liked_by_user,
+#
+#     }
+#
+#     return render(request, template_name='photos/photo-details-page.html', context=context)
+
+@login_required
 def details_photo(request, pk):
     photo = Photo.objects.get(pk=pk)
-    user = request.user
-    likes = photo.like_set.all()
-    photo_is_liked_by_user = likes.filter(user=request.user)
-    comments = photo.comment_set.all()
     comment_form = CommentForm()
 
     context = {
-        'photo': photo,
-        'likes': likes,
-        'comment_form': comment_form,
-        'comments': comments,
-        'photo_is_liked_by_user': photo_is_liked_by_user,
-
+        "photo": photo,
+        "likes": photo.like_set.count(),
+        "comments": photo.comment_set.all(),
+        "comment_form": comment_form,
     }
 
-    return render(request, template_name='photos/photo-details-page.html', context=context)
+    return render(
+        request,
+        'photos/photo-details-page.html',
+        context=context
+    )
 
 
 def edit_photo(request, pk):
@@ -75,7 +93,7 @@ def edit_photo(request, pk):
 
     return render(request, template_name='photos/photo-edit-page.html', context=context)
 
-
+@login_required
 def delete_photo(request, pk):
     photo = Photo.objects.get(pk=pk)
     photo.delete()

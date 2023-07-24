@@ -18,8 +18,11 @@ def index(request):
         if search_form.is_valid():
             all_photos = all_photos.filter(tagged_pets__name__icontains=search_form.cleaned_data['pet_name'])
 
-    for photo in all_photos:
-        photo.liked_by_user = photo.like_set.filter(user=request.user).exists()
+    if request.user.is_authenticated:
+
+        for photo in all_photos:
+            if photo:
+                photo.liked_by_user = photo.like_set.filter(user=request.user).exists()
 
     context = {
         'all_photos': all_photos,
@@ -58,7 +61,10 @@ def add_comment(request, photo_id):
         if form.is_valid():
             comment = form.save(commit=False)
             comment.to_photo = photo
-            comment.user = request.user
+            if request.user.is_authenticated:
+                comment.user = request.user  # Assign the authenticated user to the comment
+            else:
+                comment.user = None  # If anonymous, set user to None
             comment.save()
 
         return redirect(request.META['HTTP_REFERER'] + f'#{photo_id}')

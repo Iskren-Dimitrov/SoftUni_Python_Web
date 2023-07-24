@@ -23,6 +23,7 @@ def add_pet(request):
     return render(request, template_name='pets/pet-add-page.html', context=context)
 
 
+@login_required
 def details_pet(request, username, pet_slug):
     pet = Pet.objects.get(slug=pet_slug)
     owner = PetstagramUser.objects.get(username=username)
