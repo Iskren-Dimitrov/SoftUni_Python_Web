@@ -1,3 +1,5 @@
+import pet as pet
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import HttpResponse
 from django.shortcuts import render
 from django.templatetags.static import static
@@ -7,6 +9,8 @@ from django.views import generic as views
 from petstagram_try.accounts.forms import PetstagramUserCreateForm, LoginForm, PetstagramUserEditForm
 from petstagram_try.accounts.models import PetstagramUser
 from django.contrib.auth import views as auth_views, login, get_user_model
+
+from petstagram_try.pets.models import Pet
 
 UserModel = get_user_model()
 
@@ -34,7 +38,7 @@ class UserLogoutView(auth_views.LogoutView):
     next_page = reverse_lazy('login')
 
 
-class UserDetailsView(views.DetailView):
+class UserDetailsView(LoginRequiredMixin, views.DetailView):
     model = PetstagramUser
     template_name = 'accounts/profile-details-page.html'
     profile_image = static('images/person.png')
@@ -46,14 +50,14 @@ class UserDetailsView(views.DetailView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-
+        context['is_owner'] = self.request.user == self.object
         context['profile_image'] = self.get_profile_image()
         context['pets'] = self.request.user.pet_set.all()
 
         total_likes_count = sum(p.like_set.count() for p in self.object.photo_set.all())
 
         context.update({
-            'total_likes_count': total_likes_count
+            'total_likes_count': total_likes_count,
         })
 
         return context

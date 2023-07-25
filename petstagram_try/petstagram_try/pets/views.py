@@ -1,7 +1,5 @@
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect
-
-from petstagram_try.accounts.models import PetstagramUser
 from petstagram_try.common.forms import CommentForm
 from petstagram_try.pets.forms import PetForm, PetDeleteForm
 from petstagram_try.pets.models import Pet
@@ -14,7 +12,7 @@ def add_pet(request):
         pet = form.save(commit=False)
         pet.user = request.user
         pet.save()
-        return redirect('profile-details', pk=6)
+        return redirect('profile-details', request.user.pk)
 
     context = {
         'form': form
@@ -26,7 +24,6 @@ def add_pet(request):
 @login_required
 def details_pet(request, username, pet_slug):
     pet = Pet.objects.get(slug=pet_slug)
-    owner = PetstagramUser.objects.get(username=username)
     all_photos = pet.photo_set.all()
     comment_form = CommentForm()
 
@@ -34,7 +31,8 @@ def details_pet(request, username, pet_slug):
         'pet': pet,
         'all_photos': all_photos,
         'comment_form': comment_form,
-        'owner': owner,
+        'is_owner': request.user == pet.user,
+
     }
     return render(request, template_name='pets/pet-details-page.html', context=context)
 
@@ -62,7 +60,7 @@ def delete_pet(request, username, pet_slug):
     pet = Pet.objects.get(slug=pet_slug)
     if request.method == 'POST':
         pet.delete()
-        return redirect('profile-details', pk=6)
+        return redirect('profile-details', request.user.pk)
     form = PetDeleteForm(initial=pet.__dict__)
 
     context = {

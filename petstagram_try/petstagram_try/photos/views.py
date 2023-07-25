@@ -23,6 +23,12 @@ class PhotoAddView(LoginRequiredMixin, views.CreateView):
         self.object.save()
         return super().form_valid(form)
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['is_owner'] = self.request.user == self.object
+
+        return context
+
 
 # @login_required
 # def add_photo(request):
@@ -69,6 +75,8 @@ def details_photo(request, pk):
         "likes": photo.like_set.count(),
         "comments": photo.comment_set.all(),
         "comment_form": comment_form,
+        'is_owner': request.user == photo.user,
+
     }
 
     return render(
@@ -88,10 +96,11 @@ def edit_photo(request, pk):
 
     context = {
         'form': form,
-        'photo': photo
+        'photo': photo,
     }
 
     return render(request, template_name='photos/photo-edit-page.html', context=context)
+
 
 @login_required
 def delete_photo(request, pk):

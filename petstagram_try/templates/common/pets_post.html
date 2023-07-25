@@ -5,29 +5,35 @@
             <div class="userDetails">
                 <!-- Link to User Profile Page -->
                 {% if photo.user.pk %}
-                <a href="{% url 'profile-details' photo.user.pk %}">
+                    <a href="{% url 'profile-details' photo.user.pk %}">
                 {% endif %}
-                    <div class="profilepic">
-                        <div class="profile_img">
-                            <div class="image">
-                                {% if photo.user.profile_picture %}
-                                    <img src="{{ photo.user.profile_picture }}" alt="img8">
-                                {% else %}
-                                    <img src="{% static 'images/person.png' %}" alt="img8">
-                                {% endif %}
-                            </div>
+                <div class="profilepic">
+                    <div class="profile_img">
+                        <div class="image">
+                            {% if photo.user.profile_picture %}
+                                <img src="{{ photo.user.profile_picture }}" alt="img8">
+                            {% else %}
+                                <img src="{% static 'images/person.png' %}" alt="img8">
+                            {% endif %}
                         </div>
                     </div>
+                </div>
                 </a>
                 <h3>
                     <!-- Link to User Profile Page -->
                     {% if photo.user.pk %}
-                    <a href="{% url 'profile-details' photo.user.pk %}">
-                        {% endif %}
-                        <!-- if user has first name and last name -->
+                        <a href="{% url 'profile-details' photo.user.pk %}">
+                    {% endif %}
+
+                    {% if photo.user.first_name and photo.user.last_name %}
                         {{ photo.user.get_user_name }}
-                        <!-- else -->
-                        <!-- show user username -->
+                        <!-- if user has first name and last name -->
+                    {% else %}
+                        {{ photo.user.username }}
+                        <!-- User Comment -->
+                    {% endif %}
+                    <!-- else -->
+                    <!-- show user username -->
                     </a>
                     <br>
                     {% if photo.location %}
@@ -121,29 +127,51 @@
             <h5 class="postTime">{{ photo.date_of_publication }}</h5>
 
             {% for comment in photo.comment_set.all %}
-                <div class="comments">
+                {% if comment.user.profile_picture %}
+                    <div class="comments">
                     <div class="top">
-                        <div class="userDetails">
-                            <div class="comment-data">
-                                <div class="profilepic">
-                                    <div class="profile_img">
-                                        <div class="image">
-                                            <img src="{% static 'images/person.png' %}" alt="img8">
-                                        </div>
-                                    </div>
-                                </div>
-                                <p>
-                                    {# TODO: fix with auth #}
-                                    <a href="">{{ comment.user }}</a>
-                                    <!-- User Comment -->
-                                    {{ comment.text }}
-
-                                </p>
+                    <div class="userDetails">
+                    <div class="comment-data">
+                    <div class="profilepic">
+                        <div class="profile_img">
+                            <div class="image">
+                                <img src="{{ comment.user.profile_picture }}" alt="img8">
                             </div>
-                            <span>{{ comment.publication_date }}</span>
                         </div>
                     </div>
-                </div>
+                {% else %}
+                    <div class="comments">
+                    <div class="top">
+                    <div class="userDetails">
+                    <div class="comment-data">
+                    <div class="profilepic">
+                        <div class="profile_img">
+                            <div class="image">
+                                <img src="{% static 'images/person.png' %}" alt="img8">
+                            </div>
+                        </div>
+                    </div>
+                {% endif %}
+            <p>
+                {# TODO: fix with auth #}
+                {% if comment.user.first_name and comment.user.last_name %}
+
+                    <a href="{% url 'profile-details' comment.user.pk %}">
+                        {{ comment.user.get_user_name }}</a>
+                {% else %}
+                    <a href="{% url 'index' %}">
+                        {{ comment.user.username }}</a>
+                {% endif %}
+
+                <!-- User Comment -->
+                {{ comment.text }}
+
+            </p>
+            </div>
+            <span>{{ comment.date_time_of_publication|date:"d-m-Y H:i" }}</span>
+            </div>
+            </div>
+            </div>
                 <!-- End Comments Section -->
             {% endfor %}
 
@@ -162,6 +190,7 @@
                     {% csrf_token %}
                 </form>
             </div>
-        </div>
-    </div>
+            </div>
+            </div>
+
 {% endfor %}
